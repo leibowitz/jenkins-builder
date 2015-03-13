@@ -54,4 +54,40 @@ func main() {
 		os.Exit(1)
 	}
 	fmt.Printf("Found job %s\n", job.GetName())
+	fmt.Printf("Next build number: %d\n", job.GetDetails().NextBuildNumber)
+
+	var params []string
+	var buildParams flag.FlagSet
+	for _, property := range job.GetDetails().Property {
+		for _, param := range property.ParameterDefinitions {
+			//fmt.Printf("%s\n", param.Name)
+			var value string
+			buildParams.StringVar(&value, param.Name, "", "")
+			params = append(params, param.Name)
+		}
+	}
+
+	if len(params) > 0 {
+		err := buildParams.Parse(args())
+		if err != nil {
+			fmt.Printf("Couldn't parse the build arguments: %s\n", err.Error())
+			os.Exit(1)
+		}
+
+		for _, name := range params {
+			f := buildParams.Lookup(name)
+			fmt.Printf("%s: %s\n", f.Name, f.Value)
+		}
+	}
+}
+
+// get list of command-line arguments pre-prended with "-"
+// so we can parse them using flag.Parse()
+func args() []string {
+	args := flag.Args()
+	var nArgs []string
+	for _, s := range args {
+		nArgs = append(nArgs, "-"+s)
+	}
+	return nArgs
 }
