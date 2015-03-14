@@ -83,7 +83,15 @@ func main() {
 	}
 
 	fmt.Printf("Triggering build with params: %+v\n", params)
-	job.InvokeSimple(params)
+	rsp := job.Build(params)
+	var status string
+	if job.Successful(rsp) {
+		status = "OK"
+	} else {
+		status = "FAILED"
+	}
+	fmt.Printf("%s\n", status)
+	fmt.Printf("%s\n", rsp.Header.Get("Location"))
 }
 
 // get list of command-line arguments pre-prended with "-"
