@@ -24,6 +24,10 @@ func main() {
 
 	fmt.Printf("Using jenkins URL %s\n", url)
 	jenkins := gojenkins.CreateJenkins(url).Init()
+	if jenkins == nil {
+		fmt.Printf("Unable to connect to: %s", url)
+		os.Exit(1)
+	}
 
 	if name == "" && regex == "" {
 		flag.Usage()
