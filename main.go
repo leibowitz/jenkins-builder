@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/bndr/gojenkins"
+	"github.com/leibowitz/gojenkins"
 	"os"
 	"regexp"
 )
