@@ -6,6 +6,7 @@ import (
 	"github.com/leibowitz/gojenkins"
 	"os"
 	"regexp"
+	"time"
 )
 
 func main() {
@@ -92,6 +93,69 @@ func main() {
 	}
 	fmt.Printf("%s\n", status)
 	fmt.Printf("%s\n", rsp.Header.Get("Location"))
+
+	// Wait for a maximum of 2 minutes
+	maxWait := 2 * time.Minute
+
+	start := time.Now()
+
+	var build *gojenkins.Build
+	// Wait for build to exist
+	for {
+		//fmt.Printf("1.Waiting for build: %d\n", job.GetDetails().NextBuildNumber)
+		build = job.GetBuild(job.GetDetails().NextBuildNumber)
+		if build != nil {
+			fmt.Printf("\nBuild found\n")
+			break
+		}
+		if time.Now().Sub(start) > maxWait {
+			fmt.Printf("\nGiving up waiting for build to exist\n")
+			os.Exit(1)
+		}
+		fmt.Printf(".")
+		time.Sleep(3 * time.Second)
+	}
+
+	if build.GetResult() == "" {
+		// Wait for build to start
+		for {
+			//fmt.Printf("2.Result: %s\n", build.GetResult())
+			if build.IsRunning() || build.GetResult() != "" {
+				fmt.Printf("\nJob is Running\n")
+				break
+			}
+
+			if time.Now().Sub(start) > maxWait {
+				fmt.Printf("\nGiving up waiting for build to start\n")
+				os.Exit(1)
+			}
+			fmt.Printf(".")
+			time.Sleep(3 * time.Second)
+		}
+	}
+
+	// Waiting for build to finish
+	for {
+		build.Poll()
+		//fmt.Printf("3.Result: %s\n", build.GetResult())
+		if build.GetResult() != "" {
+			fmt.Printf("\nJob is Finished\n")
+			break
+		}
+
+		if time.Now().Sub(start) > maxWait {
+			fmt.Printf("\nGiving up waiting for build to finish\n")
+			os.Exit(1)
+		}
+		fmt.Printf(".")
+		time.Sleep(3 * time.Second)
+	}
+
+	if build.GetResult() == "SUCCESS" {
+		fmt.Printf("Result: %v\n", build.Raw.Description.(string))
+	} else {
+		fmt.Printf("Job %s", build.GetResult())
+	}
 }
 
 // get list of command-line arguments pre-prended with "-"
