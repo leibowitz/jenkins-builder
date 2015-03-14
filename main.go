@@ -88,14 +88,20 @@ func main() {
 	}
 
 	fmt.Printf("Triggering build with params: %+v\n", params)
-	rsp := job.Build(params)
-	var status string
-	if job.Successful(rsp) {
+
+	status := "FAILED"
+
+	rsp, err := job.Build(params)
+	if err == nil && job.Successful(rsp) {
 		status = "OK"
-	} else {
-		status = "FAILED"
 	}
+
 	fmt.Printf("%s\n", status)
+
+	if !job.Successful(rsp) {
+		os.Exit(1)
+	}
+
 	fmt.Printf("%s\n", rsp.Header.Get("Location"))
 
 	// Wait for a maximum of 2 minutes
