@@ -105,7 +105,7 @@ func main() {
 		//fmt.Printf("1.Waiting for build: %d\n", job.GetDetails().NextBuildNumber)
 		build = job.GetBuild(job.GetDetails().NextBuildNumber)
 		if build != nil {
-			fmt.Printf("\nBuild found\n")
+			fmt.Printf("\nBuild found:\n%s\n", build.GetUrl())
 			break
 		}
 		if time.Now().Sub(start) > maxWait {
@@ -115,6 +115,14 @@ func main() {
 		fmt.Printf(".")
 		time.Sleep(3 * time.Second)
 	}
+
+	go func(build *gojenkins.Build) {
+
+		err := build.StreamOutput()
+		if err != nil {
+			fmt.Printf("Couldn't stream output: %s\n", err)
+		}
+	}(build)
 
 	if build.GetResult() == "" {
 		// Wait for build to start
