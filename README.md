@@ -17,7 +17,7 @@ Example:
 
 Support custom build parameters as arguments:
 
-`./jenkins-builder -jenkins="$JENKINS_URL" -job="$PROJECT_NAME" BUILDPARAM1=A BUILDPARAM2=B`
+`./jenkins-builder -jenkins="$JENKINS_URL" -job="$PROJECT_NAME" BUILDPARAM=ABC`
 
 Also include option to tail output directly to your terminal (will exit after 5min):
 
