@@ -11,10 +11,13 @@ import (
 
 func main() {
 	var url, name, regex string
+	// Wait max X minutes for the build to finish
+	wait := time.Duration(2 * time.Minute)
 
 	flag.StringVar(&url, "jenkins", "", "Your jenkins url")
 	flag.StringVar(&name, "job", "", "Your job name")
 	flag.StringVar(&regex, "regex", "", "Regex for job name")
+	flag.DurationVar(&wait, "wait", wait, "Maximum time to wait for a build")
 	flag.Parse()
 
 	if url == "" {
@@ -104,9 +107,6 @@ func main() {
 
 	fmt.Printf("%s\n", rsp.Header.Get("Location"))
 
-	// Wait for a maximum of 2 minutes
-	maxWait := 2 * time.Minute
-
 	start := time.Now()
 
 	var build *gojenkins.Build
@@ -118,7 +118,7 @@ func main() {
 			fmt.Printf("\nBuild found:\n%s\n", build.GetUrl())
 			break
 		}
-		if time.Now().Sub(start) > maxWait {
+		if time.Now().Sub(start) > wait {
 			fmt.Printf("\nGiving up waiting for build to exist\n")
 			os.Exit(1)
 		}
@@ -143,7 +143,7 @@ func main() {
 				break
 			}
 
-			if time.Now().Sub(start) > maxWait {
+			if time.Now().Sub(start) > wait {
 				fmt.Printf("\nGiving up waiting for build to start\n")
 				os.Exit(1)
 			}
@@ -161,7 +161,7 @@ func main() {
 			break
 		}
 
-		if time.Now().Sub(start) > maxWait {
+		if time.Now().Sub(start) > wait {
 			fmt.Printf("\nGiving up waiting for build to finish\n")
 			os.Exit(1)
 		}
