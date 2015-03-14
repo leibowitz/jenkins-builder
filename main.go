@@ -11,13 +11,15 @@ import (
 
 func main() {
 	var url, name, regex string
+	var tail bool
 	// Wait max X minutes for the build to finish
-	wait := time.Duration(2 * time.Minute)
+	maxWait := time.Duration(2 * time.Minute)
 
 	flag.StringVar(&url, "jenkins", "", "Your jenkins url")
 	flag.StringVar(&name, "job", "", "Your job name")
 	flag.StringVar(&regex, "regex", "", "Regex for job name")
-	flag.DurationVar(&wait, "wait", wait, "Maximum time to wait for a build")
+	flag.BoolVar(&tail, "tail", tail, "Tail output to console")
+	flag.DurationVar(&maxWait, "maxwait", maxWait, "Maximum time to wait for a build")
 	flag.Parse()
 
 	if url == "" {
@@ -106,6 +108,10 @@ func main() {
 	}
 
 	fmt.Printf("%s\n", rsp.Header.Get("Location"))
+	// Stop now if we are not tailing build output to console
+	if !tail {
+		os.Exit(0)
+	}
 
 	start := time.Now()
 
@@ -118,7 +124,7 @@ func main() {
 			fmt.Printf("\nBuild found:\n%s\n", build.GetUrl())
 			break
 		}
-		if time.Now().Sub(start) > wait {
+		if time.Now().Sub(start) > maxWait {
 			fmt.Printf("\nGiving up waiting for build to exist\n")
 			os.Exit(1)
 		}
@@ -143,7 +149,7 @@ func main() {
 				break
 			}
 
-			if time.Now().Sub(start) > wait {
+			if time.Now().Sub(start) > maxWait {
 				fmt.Printf("\nGiving up waiting for build to start\n")
 				os.Exit(1)
 			}
@@ -161,7 +167,7 @@ func main() {
 			break
 		}
 
-		if time.Now().Sub(start) > wait {
+		if time.Now().Sub(start) > maxWait {
 			fmt.Printf("\nGiving up waiting for build to finish\n")
 			os.Exit(1)
 		}
