@@ -181,7 +181,9 @@ func main() {
 	}
 
 	if build.GetResult() == "SUCCESS" {
-		fmt.Printf("Result: %v\n", build.Raw.Description.(string))
+		if build.Raw.Description != nil {
+			fmt.Printf("Result: %v\n", build.Raw.Description.(string))
+		}
 	} else {
 		fmt.Printf("Job %s\n", build.GetResult())
 	}
