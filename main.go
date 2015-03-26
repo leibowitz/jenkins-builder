@@ -133,10 +133,15 @@ func main() {
 	}
 
 	go func(build *gojenkins.Build) {
+		if build == nil {
+			fmt.Printf("Can't stream output with no build to stream from")
+			return
+		}
 
 		err := build.StreamOutput()
 		if err != nil {
-			fmt.Printf("Couldn't stream output: %s\n", err)
+			fmt.Printf("Couldn't stream output: %s\n", err.Error())
+			return
 		}
 	}(build)
 
